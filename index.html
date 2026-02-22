@@ -21,7 +21,6 @@
             #status-bar { font-size: 36px !important; }
         }
         
-        /* ゲート画面とボタンの改善 */
         #gate-screen { 
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
             background: #111; display: flex; flex-direction: column; 
@@ -34,7 +33,6 @@
         .numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
         .numpad button { width: 70px; height: 70px; font-size: 28px; background: #333; color: #fff; border: 2px solid #555; border-radius: 10px; }
 
-        /* 入室ボタン：白地・黒文字・大きく（色盲の方への配慮） */
         #enter-btn { 
             margin-top: 30px; padding: 20px 80px; font-size: 32px; font-weight: bold;
             background: #fff; color: #000; border: none; border-radius: 15px; cursor: pointer;
@@ -135,7 +133,7 @@
             hand.style.left = x + "px";
             hand.style.top = y + "px";
 
-            if (step === 1) { // 点火判定
+            if (step === 1) { // 点火：下から上へのスライド
                 if (x > 750 && x < 850 && y > 350 && y < 500) { enteredSide = true; } 
                 if (enteredSide && x > 750 && y < 350) { 
                     step = 2; enteredSide = false;
@@ -145,13 +143,24 @@
                 }
             }
             
-            if (step === 3) { // 消火判定（横スライド必須）
-                if ((x < 300 || x > 500) && (y > 300 && y < 450)) { enteredSide = true; }
+            if (step === 3) { // 消火：真横スライド厳格化
+                // 1. まずランプの「真横」の高さ（Y軸が火の周辺）で、左右に大きく離れた場所を通ったかチェック
+                if ((x < 280 || x > 520) && (y > 300 && y < 420)) { 
+                    enteredSide = true; 
+                }
+                
+                // 2. 「真横」を通った状態で、火の上に重なったか
                 if (enteredSide && x > 380 && x < 420 && y > 300 && y < 400) {
-                    step = 4; enteredSide = false;
-                    document.getElementById('lamp').src = "assets/lamp_close.png";
-                    hand.style.display = "none";
-                    endGame("完璧な作法だ。脱出成功！", true);
+                    // 3. 追加チェック：上下からの侵入を防ぐ（直前の動きが主に横方向(X軸)であることを確認）
+                    const moveX = Math.abs(x - lastX);
+                    const moveY = Math.abs(y - lastY);
+                    
+                    if (moveX > moveY || moveX > 5) { // 横の動きが縦より強い、もしくは十分な横移動がある
+                        step = 4; enteredSide = false;
+                        document.getElementById('lamp').src = "assets/lamp_close.png";
+                        hand.style.display = "none";
+                        endGame("完璧な作法だ。脱出成功！", true);
+                    }
                 }
             }
             lastX = x; lastY = y;
