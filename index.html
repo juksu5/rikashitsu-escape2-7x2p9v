@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="robots" content="noindex,nofollow">
-    <title>理科室の掟 2：完全版</title>
+    <title>理科室の掟 2：ボリューム調整版</title>
     <style>
         body { background-color: #000; color: #eee; text-align: center; font-family: serif; margin: 0; overflow: hidden; touch-action: none; }
         
@@ -99,6 +99,10 @@
             if (currentPass === PASSWORD) {
                 document.getElementById('gate-screen').style.display = 'none';
                 document.getElementById('game-container').style.display = 'block';
+                
+                // 音量設定（ここに追加したよ！）
+                bgm.volume = 0.8;
+                
                 [bgm, seScratch, seIgnite, seGameOver, seSuccess].forEach(s => s.load());
                 bgm.loop = true; bgm.play().catch(() => {});
                 startGame();
@@ -133,7 +137,7 @@
             hand.style.left = x + "px";
             hand.style.top = y + "px";
 
-            if (step === 1) { // 点火：下から上へのスライド
+            if (step === 1) { 
                 if (x > 750 && x < 850 && y > 350 && y < 500) { enteredSide = true; } 
                 if (enteredSide && x > 750 && y < 350) { 
                     step = 2; enteredSide = false;
@@ -143,19 +147,12 @@
                 }
             }
             
-            if (step === 3) { // 消火：真横スライド厳格化
-                // 1. まずランプの「真横」の高さ（Y軸が火の周辺）で、左右に大きく離れた場所を通ったかチェック
-                if ((x < 280 || x > 520) && (y > 300 && y < 420)) { 
-                    enteredSide = true; 
-                }
-                
-                // 2. 「真横」を通った状態で、火の上に重なったか
+            if (step === 3) { 
+                if ((x < 280 || x > 520) && (y > 300 && y < 420)) { enteredSide = true; }
                 if (enteredSide && x > 380 && x < 420 && y > 300 && y < 400) {
-                    // 3. 追加チェック：上下からの侵入を防ぐ（直前の動きが主に横方向(X軸)であることを確認）
                     const moveX = Math.abs(x - lastX);
                     const moveY = Math.abs(y - lastY);
-                    
-                    if (moveX > moveY || moveX > 5) { // 横の動きが縦より強い、もしくは十分な横移動がある
+                    if (moveX > moveY || moveX > 5) { 
                         step = 4; enteredSide = false;
                         document.getElementById('lamp').src = "assets/lamp_close.png";
                         hand.style.display = "none";
