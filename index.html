@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="robots" content="noindex,nofollow">
-    <title>理科室の掟 2：修正版</title>
+    <title>理科室の掟 2：完全版</title>
     <style>
         body { background-color: #000; color: #eee; text-align: center; font-family: serif; margin: 0; overflow: hidden; touch-action: none; }
         
@@ -27,12 +27,14 @@
             background: #111; display: flex; flex-direction: column; 
             align-items: center; justify-content: center; z-index: 1000; 
         }
+        #gate-screen h1 { color: #f00; text-shadow: 0 0 10px #f00; font-size: 2.5rem; margin-bottom: 5px; }
+        #gate-subtitle { color: #ccc; font-size: 1.1rem; margin-bottom: 20px; }
         #pass-display { font-size: 40px; letter-spacing: 10px; margin: 10px; min-height: 50px; color: #fff; }
         
         .numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
         .numpad button { width: 70px; height: 70px; font-size: 28px; background: #333; color: #fff; border: 2px solid #555; border-radius: 10px; }
 
-        /* 入室ボタンの改善（白地・黒文字・大きく） */
+        /* 入室ボタン：白地・黒文字・大きく（色盲の方への配慮） */
         #enter-btn { 
             margin-top: 30px; padding: 20px 80px; font-size: 32px; font-weight: bold;
             background: #fff; color: #000; border: none; border-radius: 15px; cursor: pointer;
@@ -50,7 +52,8 @@
 <body>
 
     <div id="gate-screen">
-        <h1 style="color:#f00;">理科室脱出 2</h1>
+        <h1>理科室脱出ミッション 2</h1>
+        <div id="gate-subtitle">アルコールランプ編（安全に点火して消火しよう...）</div>
         <div id="pass-display"></div>
         <div class="numpad">
             <button onclick="addNum('1')">1</button><button onclick="addNum('2')">2</button><button onclick="addNum('3')">3</button>
@@ -88,8 +91,6 @@
         let lastX = 0, lastY = 0;
         let gameOver = false;
         let timerId;
-        
-        // スライド検知フラグ
         let enteredSide = false;
 
         function addNum(n) { currentPass += n; updatePassDisplay(); }
@@ -116,7 +117,6 @@
             container.addEventListener('mousemove', handleMove);
             container.addEventListener('touchmove', (e) => { e.preventDefault(); handleMove(e.touches[0]); }, { passive: false });
             
-            // ランプのクリック/タップ
             const lampEl = document.getElementById('lamp');
             const handleLampAction = (e) => { e.preventDefault(); clickLamp(); };
             lampEl.addEventListener('mousedown', handleLampAction);
@@ -135,8 +135,7 @@
             hand.style.left = x + "px";
             hand.style.top = y + "px";
 
-            // ステップ1: マッチを擦る（箱の右端で下から上へスライド）
-            if (step === 1) {
+            if (step === 1) { // 点火判定
                 if (x > 750 && x < 850 && y > 350 && y < 500) { enteredSide = true; } 
                 if (enteredSide && x > 750 && y < 350) { 
                     step = 2; enteredSide = false;
@@ -146,12 +145,8 @@
                 }
             }
             
-            // ステップ3: 消火（ランプの横から芯へスライド）
-            if (step === 3) {
-                // ランプの真横（左右どちらか）を通ったか
+            if (step === 3) { // 消火判定（横スライド必須）
                 if ((x < 300 || x > 500) && (y > 300 && y < 450)) { enteredSide = true; }
-                
-                // 横を通った後に、芯（中央付近）に重なったら成功
                 if (enteredSide && x > 380 && x < 420 && y > 300 && y < 400) {
                     step = 4; enteredSide = false;
                     document.getElementById('lamp').src = "assets/lamp_close.png";
